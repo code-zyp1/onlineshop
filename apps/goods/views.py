@@ -1,11 +1,14 @@
 from django.shortcuts import render
 
 # Create your views here.
-from goods.serializers import GoodsSerializer,CategorySerializer
-from .models import Goods,GoodsCategory
+from goods.serializers import GoodsSerializer,CategorySerializer,BannerSerializer,BrandSerializer
+from .models import Goods,GoodsCategory,Banner
 from rest_framework.response import Response
 from rest_framework import mixins
 from rest_framework import generics
+
+from rest_framework.throttling import UserRateThrottle,AnonRateThrottle
+from rest_framework_extensions.cache.mixins import CacheResponseMixin
 from rest_framework import viewsets
 from rest_framework.pagination import PageNumberPagination
 from .filters import GoodsFilter
@@ -37,7 +40,7 @@ class GoodsPagination(PageNumberPagination):
 
 
 
-class GoodsListViewSet(viewsets.ModelViewSet):
+class GoodsListViewSet(CacheResponseMixin,mixins.ListModelMixin, mixins.RetrieveModelMixin,viewsets.GenericViewSet):
     '''
     list:商品列表,分页，搜索
 
@@ -56,6 +59,18 @@ class GoodsListViewSet(viewsets.ModelViewSet):
     search_fields = ('=name', 'is_new')
     #排序
     ordering_fields = ('sold_num','add_time')
+    throttle_classes = (UserRateThrottle, AnonRateThrottle)
+
+    # 商品点击数 + 1
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        instance.click_num += 1
+        instance.save()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+
+
+
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
@@ -65,3 +80,10 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
     queryset = GoodsCategory.objects.filter(category_type=1)
     serializer_class = CategorySerializer
+
+class BannerViewset(mixins.ListModelMixin, viewsets.GenericViewSet):
+    """
+    首页轮播图
+    """
+    queryset = Banner.objects.all().order_by("index")
+    serializer_class = BannerSerializer

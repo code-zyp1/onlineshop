@@ -15,7 +15,7 @@ Including another URLconf
 """
 import xadmin
 from django.urls import path,include,re_path
-from goods.views import CategoryViewSet,GoodsListViewSet
+from goods.views import CategoryViewSet,GoodsListViewSet,BannerViewset
 from user_operation.views import UserFavViewset
 from users.views import SmsCodeViewset,UserViewset
 from user_operation.views import LeavingMessageViewset,AddressViewset
@@ -37,6 +37,7 @@ router.register(r'messages', LeavingMessageViewset, basename="messages")
 router.register(r'address',AddressViewset , basename="address")
 router.register(r'shopcarts', ShoppingCartViewset, basename="shopcarts")
 router.register(r'orders', OrderViewset, basename="orders")
+router.register(r'banners', BannerViewset, basename="banners")
 
 
 urlpatterns = [

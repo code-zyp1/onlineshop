@@ -135,6 +135,9 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
+REST_FRAMEWORK_EXTENSIONS = {
+    'DEFAULT_CACHE_RESPONSE_TIMEOUT': 5   #5s过期，时间自己可以随便设定
+}
 REST_FRAMEWORK ={
     #分页
     'DEFAULT_PAINATION_CLASS':'rest_framework.pagination.PageNumberPagination',
@@ -143,7 +146,16 @@ REST_FRAMEWORK ={
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
-    )
+    ),
+    # 限速设置
+    'DEFAULT_THROTTLE_CLASSES': (
+        'rest_framework.throttling.AnonRateThrottle',  # 未登陆用户
+        'rest_framework.throttling.UserRateThrottle'  # 登陆用户
+    ),
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '3/minute',  # 每分钟可以请求两次
+        'user': '5/minute'  # 每分钟可以请求五次
+    }
 }
 #有效期限
 JWT_AUTH = {
@@ -154,6 +166,19 @@ JWT_AUTH = {
 REGEX_MOBILE = "^1[358]\d{9}$|^147\d{8}$|^176\d{8}$"
 #云片的APIKEY
 APIKEY = "xxxxx12345678xxxxxxxxxx"
+
+#redis缓存
+# CACHES = {
+#     "default": {
+#         "BACKEND": "django_redis.cache.RedisCache",
+#         "LOCATION": "redis://127.0.0.1:6369/1",
+#         "OPTIONS": {
+#             "CLIENT_CLASS": "django_redis.client.DefaultClient",
+#         }
+#     }
+# }
+
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
